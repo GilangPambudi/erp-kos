@@ -1,49 +1,79 @@
-import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarMenuSub,
+    SidebarMenuSubButton,
+    SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { LayoutGrid, TableProperties, Users, ReceiptText, CreditCard } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import { ChevronDown, CreditCard, LayoutGrid, ReceiptText, TableProperties, Users, Database, type LucideIcon } from 'lucide-react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+type NavItem = {
+    title: string;
+    url: string;
+    icon: LucideIcon;
+    isActive?: (url: string) => boolean;
+};
+
+type NavGroup = {
+    title: string;
+    icon: LucideIcon;
+    items: NavItem[];
+};
+
+const navItems: (NavItem | NavGroup)[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        url: '/dashboard',
         icon: LayoutGrid,
+        isActive: (url) => url.startsWith('/dashboard'),
     },
     {
-        title: 'Properties',
-        href: '/properties',
-        icon: TableProperties,
+        title: 'Data Master',
+        icon: Database,
+        items: [
+            {
+                title: 'Properties',
+                url: '/properties',
+                icon: TableProperties,
+                isActive: (url) => url.startsWith('/properties'),
+            },
+            {
+                title: 'Tenants',
+                url: '/tenants',
+                icon: Users,
+                isActive: (url) => url.startsWith('/tenants'),
+            },
+        ],
     },
     {
-        title: 'Tenants',
-        href: '/tenants',
-        icon: Users,
-    },
-    {
-        title: 'Contracts',
-        href: '/tenancies',
+        title: 'Tenancies',
+        url: '/tenancies',
         icon: ReceiptText,
+        isActive: (url) => url.startsWith('/tenancies'),
     },
     {
         title: 'Payments',
-        href: '/payments',
+        url: '/payments',
         icon: CreditCard,
+        isActive: (url) => url.startsWith('/payments'),
     },
 ];
 
 export function AppSidebar() {
+    const page = usePage();
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -59,7 +89,54 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {navItems.map((item) => {
+                                if ('items' in item) {
+                                    return (
+                                        <Collapsible key={item.title} defaultOpen className="group/collapsible">
+                                            <SidebarMenuItem>
+                                                <CollapsibleTrigger asChild>
+                                                    <SidebarMenuButton tooltip={item.title}>
+                                                        <item.icon />
+                                                        <span>{item.title}</span>
+                                                        <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                                                    </SidebarMenuButton>
+                                                </CollapsibleTrigger>
+                                                <CollapsibleContent>
+                                                    <SidebarMenuSub>
+                                                        {item.items.map((subItem) => (
+                                                            <SidebarMenuSubItem key={subItem.title}>
+                                                                <SidebarMenuSubButton asChild isActive={subItem.isActive ? subItem.isActive(page.url) : page.url.startsWith(subItem.url)}>
+                                                                    <Link href={subItem.url}>
+                                                                        <subItem.icon />
+                                                                        <span>{subItem.title}</span>
+                                                                    </Link>
+                                                                </SidebarMenuSubButton>
+                                                            </SidebarMenuSubItem>
+                                                        ))}
+                                                    </SidebarMenuSub>
+                                                </CollapsibleContent>
+                                            </SidebarMenuItem>
+                                        </Collapsible>
+                                    );
+                                }
+
+                                return (
+                                    <SidebarMenuItem key={item.title}>
+                                        <SidebarMenuButton asChild isActive={item.isActive ? item.isActive(page.url) : page.url.startsWith(item.url)}>
+                                            <Link href={item.url}>
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                );
+                            })}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
             </SidebarContent>
 
             <SidebarFooter>
