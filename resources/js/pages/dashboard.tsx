@@ -19,7 +19,7 @@ import {
     Legend,
 } from 'recharts';
 import { format } from 'date-fns';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -46,8 +46,6 @@ type DashboardProps = {
         newTenants: Tenancy[];
     };
 };
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
 export default function Dashboard({ summary, charts, activity }: DashboardProps) {
     const [showRevenue, setShowRevenue] = useState(false);

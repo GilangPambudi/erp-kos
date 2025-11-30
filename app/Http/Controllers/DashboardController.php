@@ -37,8 +37,12 @@ class DashboardController extends Controller
         // 2. Charts & Analysis
         
         // Revenue Trend (Last 6 Months)
+        $dateFormat = DB::connection()->getDriverName() === 'sqlite'
+            ? 'strftime("%Y-%m", payment_date)'
+            : 'DATE_FORMAT(payment_date, "%Y-%m")';
+
         $revenueTrend = Payment::select(
-            DB::raw('DATE_FORMAT(payment_date, "%Y-%m") as month'),
+            DB::raw("$dateFormat as month"),
             DB::raw('SUM(amount) as total')
         )
         ->where('payment_date', '>=', now()->subMonths(6)->startOfMonth())
